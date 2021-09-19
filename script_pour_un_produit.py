@@ -1,9 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
+import csv
 
 url = "http://books.toscrape.com/catalogue/the-black-maria_991/index.html"
 page = requests.get(url)
-print (page)
 soup = BeautifulSoup(page.content, 'html.parser')
 
 product_page_url = url
@@ -29,4 +29,7 @@ donnee_final.append(url)
 
 donne_a_sauvegarder = list(zip(information, donnee_final))
 
-print (donnee_final)
+with open('donnee_pour_un_livre.csv', 'w') as fichier_csv:
+    writer = csv.writer(fichier_csv)
+    writer.writerow(information)
+    writer.writerow(donnee_final)
