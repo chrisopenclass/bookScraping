@@ -4,11 +4,20 @@ import csv
 
 lien_du_site = "http://books.toscrape.com/"
 
+information = {"universal_product_code" : [],
+               "price_including_tax" : [],
+               "price_excluding_tax" : [],
+               "number_avaible" : [], 
+               "title" : [],
+               "product_description" : [],
+               "category" : [],
+               "review_rating" : [],
+               "image_url" : [], 
+               "product_page_url" : []} 
+
 urls_categories = []
 lien_de_tout = []
 nombre_de_page = []
-
-
 
 def recuperation_des_categories () :
     url = "http://books.toscrape.com/index.html"
@@ -27,7 +36,6 @@ def recuperation_des_categories () :
     return urls_categories
 
 recuperation_des_categories()
-
 
 def recuperation_des_livres(urls_categories):
     liste_page = []
@@ -56,25 +64,25 @@ def recuperation_des_livres(urls_categories):
             print(test)
 
 
-def data_extraction(item):    
+def data_extraction(item):   
     items = requests.get(item)
     soup = BeautifulSoup(items.content, 'html.parser')
-    donnee_livre = []#on initialise une liste vide qui va nous servir
-    for x in soup.findChildren(["td"]) :# boucle pour ajouter les 4 premiéres données recherché sans les balises à notre liste
+    donnee_livre = []
+    for x in soup.findChildren(["td"]) :
         donnee_livre.append(x.string)
-    #suppression des données non voulu
-    del donnee_livre[1]
-    del donnee_livre[3]
-    del donnee_livre[4]
-    donnee_livre.append(soup.find("li", class_="active").string)# on ajoute le titre
-    donnee_livre.append(soup.find("p", class_=False, id=False).string)# on ajoute la description du produit
-    donnee_livre.append(soup.find("ul", class_="breadcrumb").find_all('a')[2].text)# on ajoute la catégorie
+    information['universal_product_code'].append(donnee_livre[0])
+    information['price_including_tax'].append(donnee_livre[2])
+    information['price_excluding_tax'].append(donnee_livre[3])
+    information['number_avaible'].append(donnee_livre[5])
+    information['title'].append(soup.find("li", class_="active").string)# on ajoute le titre
+    information['product_description'].append(soup.find("p", class_=False, id=False).string)# on ajoute la description du produit
+    information['category'].append(soup.find("ul", class_="breadcrumb").find_all('a')[2].text)# on ajoute la catégorie
     note_du_livre = (soup.find("p", class_="star-rating").attrs)#création d'un dictionaire contenant les atributs de la balise de la note
-    cle_a_garder = list(note_du_livre.values())# on extrai uniquement la note qui est une valeur du dictionnaire
-    donnee_livre.append(cle_a_garder)#on ajoute la note
-    donnee_livre.append(soup.find("img").get("src").replace("../../", "http://books.toscrape.com/"))#on ajoute la lien de lien de l'image
-    donnee_livre.append(item)
-    return donnee_livre  # on renvois notre liste  pour l'utilisé plus tard dans notre code
+    information['review_rating'].append(list(note_du_livre.values()))# on extrai uniquement la note qui est une valeur du dictionnaire
+    information['image_url'].append(soup.find("img").get("src").replace("../../", "http://books.toscrape.com/"))#on ajoute la lien de lien de l'image
+    information['product_page_url'].append(item)
+    print(information)
+    
 
 
 recuperation_des_livres(urls_categories)
