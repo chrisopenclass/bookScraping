@@ -6,7 +6,18 @@ import time
 
 lien_du_site = "http://books.toscrape.com/"
 
-base_url = "http://books.toscrape.com/index.html"
+field_name = {
+    "universal_product_code": "",
+    "price_including_tax" : "" ,
+    "price_excluding_tax" : "",
+    "number_avaible" : "",
+    "title" : "",
+    "product_description" : "",
+    "category" : "" ,
+    "review_rating" : "",
+    "image_url" : "",
+    "product_page_url" : "",
+    }
 
 book_base_url = "http://books.toscrape.com/catalogue/"
 
@@ -25,7 +36,7 @@ def parser(url):
 
 def recuperation_des_categories () :
     url_categories = []
-    soup = parser(base_url)
+    soup = parser(lien_du_site)
     for x in soup.find("div", class_="side_categories").find_all("li"):
         a = x.find("a")
         if'href' in a.attrs:
@@ -44,19 +55,16 @@ def parse_categories(liste_cat):
         soup = parser(url_categorie)
         find_next = soup.find("li", class_="next")
         if not soup.find("li", class_="next") :
-            k_categories = url_categorie.replace("http://books.toscrape.com/catalogue/category/books/", " ")
-            final_categories_list = k_categories.replace("/index.html", " ")
+            final_categories_list = soup.find("h1").string
             soup_cat = parser(url_categorie)
-            soup_catcat = soup_cat.find("ol", class_="row")
-            liste_de_la_categorie = soup_catcat.findChildren("h3")
+            liste_de_la_categorie = soup_cat.findChildren("h3")
             liste_des_liens =[]
             for i in liste_de_la_categorie :
                 les_liens = i.find("a").get('href').replace("../../../", book_base_url)
                 liste_des_liens.append(les_liens)
             dic[final_categories_list]=(liste_des_liens)
         else :
-            k_categories = url_categorie.replace("http://books.toscrape.com/catalogue/category/books/", " ")
-            final_categories_list = k_categories.replace("/index.html", " ")
+            final_categories_list = soup.find("h1").string
             dic[final_categories_list] = [url_categorie]
             page = 0
             while find_next :
@@ -83,7 +91,6 @@ def book_download (titre ,img_url):
     with open(f"{name.replace(' ', '_')}.jpg", "wb") as img:
         for url in lien :
             img.write(requests.get(url).content)
-            time.sleep(1)
     return True
 
 def data_extraction(item):
@@ -101,11 +108,11 @@ def data_extraction(item):
     if soup.find("p", class_=False, id=False):
         information['product_description']=(soup.find("p", class_=False, id=False).string)
     else:
-        information['product_description']=("ce produit n'as pas de description")# on ajoute la description du produit
-    information['category']=(soup.find("ul", class_="breadcrumb").find_all('a')[2].text)# on ajoute la catégorie
-    note_du_livre = soup.find(class_='star-rating')#création d'un dictionaire contenant les atributs de la balise de la note
-    information['review_rating']=(note_du_livre['class'][1])# on extrai uniquement la note qui est une valeur du dictionnaire
-    information['image_url']=(soup.find("img").get("src").replace("../../", "http://books.toscrape.com/"))#on ajoute la lien de lien de l'image
+        information['product_description']=("ce produit n'as pas de description")
+    information['category']=(soup.find("ul", class_="breadcrumb").find_all('a')[2].text)
+    note_du_livre = soup.find(class_='star-rating')
+    information['review_rating']=(note_du_livre['class'][1])
+    information['image_url']=(soup.find("img").get("src").replace("../../", "http://books.toscrape.com/"))
     img_url = soup.find("img").get("src").replace("../../", "http://books.toscrape.com/")
     img_url = img_url.replace('/n','')
     information['product_page_url']=(item)
@@ -120,21 +127,19 @@ def creation_du_dossier(directory):
         print("permission refusé")
         exit()
 
-def random (param):
+def main (param):
     for keys, values in param.items():
         categorie = keys
         livres = values
         print("début de la récupération des information de la catégorie " + categorie)
         creation_du_dossier(categorie)
         os.chdir(categorie)
-        with open(f'{categorie}.csv', 'w',encoding="utf-8") as fichier_csv:
+        with open(f'{categorie}.csv', 'w',encoding="utf-8", newline='') as fichier_csv:
+            writer = csv.DictWriter(fichier_csv,delimiter=',', fieldnames=field_name.keys())
+            writer.writeheader()
             for data in livres : 
                 data_list = data
-                data_list
-                #print(data_list)
                 donnee = data_extraction(data_list)
-                writer = csv.DictWriter(fichier_csv,delimiter=',', fieldnames=donnee.keys())
-                writer.writeheader()
                 writer.writerow(donnee)
         print("récupération des données de la catégories " + categorie + " téminé")
         os.chdir("../")
@@ -142,4 +147,4 @@ def random (param):
         
 recup_cat = recuperation_des_categories()
 recup_livre = parse_categories(recup_cat)
-random(recup_livre)
+main(recup_livre)
