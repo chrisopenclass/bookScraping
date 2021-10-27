@@ -32,16 +32,3 @@
     -Création d'un dossier parent qui contiendra des sous dossiers pour chaque catégorie.
 
 struture d'un dossier pour une catégorie :
-
-
-├── categorie
-│   ├── categorie.csv
-│   ├── "code upc".jpg
-│   ├── "code upc".jpg
-│   ├── "code upc".jpg
-│   ├── "code upc".jpg
-│   ├── "code upc".jpg
-│   ├── "code upc".jpg
-│   ├── "code upc".jpg
-│   └── "code upc".jpg
-
