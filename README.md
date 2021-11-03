@@ -3,7 +3,7 @@
                                                   
 si vous souhaitez télécharger le projet depuis git hub :
 
-                          git clone https://github.com/thomas-claireau/p2-da-python-analyse-de-marche.git
+                          git clone https://github.com/chrisopenclass/bookScraping
 
 ### Créer l'environnement virtuel "env"
     
